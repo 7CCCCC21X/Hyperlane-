@@ -1,6 +1,8 @@
-// api/check-hyperlane.js
 export default async function handler(req, res) {
+  // ✅ 设置允许跨域
   res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   const { addresses } = req.query;
   if (!addresses) return res.status(400).json({ error: 'Missing addresses' });
@@ -10,14 +12,14 @@ export default async function handler(req, res) {
 
   for (const addr of list) {
     try {
-      const url = `https://claim.hyperlane.foundation/api/check-eligibility?address=${addr}`;
-      const response = await fetch(url);
-      const data = await response.json();
+      const apiUrl = `https://claim.hyperlane.foundation/api/check-eligibility?address=${addr}`;
+      const r = await fetch(apiUrl);
+      const data = await r.json();
       results[addr] = data;
     } catch (e) {
       results[addr] = { error: true, message: e.message };
     }
   }
 
-  res.status(200).json({ results });
+  return res.status(200).json({ results });
 }
