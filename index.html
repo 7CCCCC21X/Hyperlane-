@@ -3,35 +3,74 @@
 <head>
   <meta charset="UTF-8" />
   <title>Hyperlane 空投批量查询</title>
+  <style>
+    body { font-family: sans-serif; max-width: 800px; margin: auto; padding: 30px; }
+    textarea { width: 100%; height: 160px; margin-bottom: 10px; }
+    button {
+      padding: 10px 20px; background: #4caf50; color: white; border: none;
+      border-radius: 5px; cursor: pointer;
+    }
+    button:hover { background: #388e3c; }
+    pre {
+      background: #f7f7f7;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .footer {
+      margin-top: 40px;
+      text-align: right;
+      font-size: 13px;
+    }
+  </style>
 </head>
 <body>
+
   <h2>Hyperlane 批量查询空投资格</h2>
-  <textarea id="input" rows="8" style="width:100%"></textarea><br>
-  <button onclick="check()">查询</button>
+  <p>每行一个钱包地址：</p>
+  <textarea id="input" placeholder="例如：\n0x123...\n0xabc..."></textarea><br>
+  <button onclick="check()">开始查询</button>
+
   <pre id="output"></pre>
+
+  <div class="footer">
+    作者推特：<a href="https://x.com/0xXIAOc" target="_blank">@0xXIAOc</a>
+  </div>
 
   <script>
     async function check() {
       const raw = document.getElementById("input").value.trim();
       const addresses = raw.split('\n').map(x => x.trim()).filter(Boolean);
-      const url = `https://your-vercel-domain.vercel.app/api/check-hyperlane?addresses=${addresses.join(',')}`;
+      if (!addresses.length) return alert("请输入至少一个钱包地址");
 
-      const res = await fetch(url);
-      const data = await res.json();
+      const url = `https://hyperlane-9eieiuiek-7ccccc21xs-projects.vercel.app/api/check-hyperlane?addresses=${addresses.join(',')}`;
 
-      let text = "";
-      addresses.forEach((addr, i) => {
-        const d = data.results[addr];
-        if (d?.response?.isEligible) {
-          const amount = d.response.eligibilities[0].amount;
-          text += `${i + 1}. ${addr} ✅ 有资格（${amount}）\n`;
-        } else {
-          text += `${i + 1}. ${addr} ❌ 无资格\n`;
-        }
-      });
+      let output = "查询中...\n";
+      document.getElementById("output").innerText = output;
 
-      document.getElementById("output").innerText = text;
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+
+        output = "";
+        addresses.forEach((addr, i) => {
+          const d = data.results[addr];
+          if (d?.response?.isEligible) {
+            const amount = d.response.eligibilities[0]?.amount || "未知";
+            output += `${i + 1}. ${addr} ✅ 有资格（${amount}）\n`;
+          } else {
+            output += `${i + 1}. ${addr} ❌ 无资格\n`;
+          }
+        });
+      } catch (e) {
+        output = "❌ 查询失败：" + e.message;
+      }
+
+      document.getElementById("output").innerText = output;
     }
   </script>
+
 </body>
 </html>
