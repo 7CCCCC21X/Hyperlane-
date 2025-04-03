@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <title>Hyperlane 空投批量查询</title>
+</head>
+<body>
+  <h2>Hyperlane 批量查询空投资格</h2>
+  <textarea id="input" rows="8" style="width:100%"></textarea><br>
+  <button onclick="check()">查询</button>
+  <pre id="output"></pre>
+
+  <script>
+    async function check() {
+      const raw = document.getElementById("input").value.trim();
+      const addresses = raw.split('\n').map(x => x.trim()).filter(Boolean);
+      const url = `https://your-vercel-domain.vercel.app/api/check-hyperlane?addresses=${addresses.join(',')}`;
+
+      const res = await fetch(url);
+      const data = await res.json();
+
+      let text = "";
+      addresses.forEach((addr, i) => {
+        const d = data.results[addr];
+        if (d?.response?.isEligible) {
+          const amount = d.response.eligibilities[0].amount;
+          text += `${i + 1}. ${addr} ✅ 有资格（${amount}）\n`;
+        } else {
+          text += `${i + 1}. ${addr} ❌ 无资格\n`;
+        }
+      });
+
+      document.getElementById("output").innerText = text;
+    }
+  </script>
+</body>
+</html>
