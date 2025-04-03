@@ -90,7 +90,7 @@
 
   <h2>Hyperlane 批量查询空投资格</h2>
   <p>每行一个钱包地址：</p>
-  <textarea id="input" placeholder=""></textarea><br>
+  <textarea id="input" placeholder="例如：\n0x123...\n0xabc..."></textarea><br>
   <button id="queryBtn" onclick="check()">开始查询</button>
 
   <div class="link">
@@ -125,7 +125,6 @@
       btn.innerText = "查询中...";
       btn.disabled = true;
 
-      const url = `https://hyperlane-9eieiuiek-7ccccc21xs-projects.vercel.app/api/check-hyperlane?addresses=${addresses.join(',')}`;
       const tbody = document.getElementById("resultBody");
       const table = document.getElementById("resultTable");
       const summary = document.getElementById("summary");
@@ -136,14 +135,16 @@
 
       let ok = 0, fail = 0;
 
-      try {
-        const res = await fetch(url);
-        const data = await res.json();
+      for (let i = 0; i < addresses.length; i++) {
+        const addr = addresses[i];
+        const apiUrl = `https://hyperlane-9eieiuiek-7ccccc21xs-projects.vercel.app/api/check-hyperlane?addresses=${addr}`;
 
-        addresses.forEach((addr, i) => {
-          const d = data.results[addr];
+        try {
+          const res = await fetch(apiUrl);
+          const data = await res.json();
+          const d = data.results?.[addr];
+
           let row = document.createElement("tr");
-
           const tdIndex = `<td>${i + 1}</td>`;
           const tdAddr = `<td>${addr}</td>`;
 
@@ -159,12 +160,15 @@
           }
 
           tbody.appendChild(row);
-        });
+          summary.innerText = `✅ 共 ${addresses.length} 个地址，符合资格 ${ok} 个，未资格 ${fail} 个`;
 
-        summary.innerText = `✅ 共 ${addresses.length} 个地址，符合资格 ${ok} 个，未资格 ${fail} 个`;
-
-      } catch (e) {
-        summary.innerText = "❌ 查询失败：" + e.message;
+        } catch (e) {
+          fail++;
+          let row = document.createElement("tr");
+          row.className = "fail";
+          row.innerHTML = `<td>${i + 1}</td><td>${addr}</td><td colspan="2">❌ 请求失败</td>`;
+          tbody.appendChild(row);
+        }
       }
 
       btn.innerText = "开始查询";
