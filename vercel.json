@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "builds": [
+    { "src": "api/check-hyperlane.js", "use": "@vercel/node" },
+    { "src": "index.html", "use": "@vercel/static" }
+  ],
+  "routes": [
+    { "src": "/api/check-hyperlane", "dest": "api/check-hyperlane.js" },
+    { "src": "/", "dest": "/index.html" }
+  ]
+}
