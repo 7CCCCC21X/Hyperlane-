@@ -1,9 +1,5 @@
 {
   "version": 2,
-  "builds": [
-    { "src": "api/check-hyperlane.ts", "use": "@vercel/edge" },
-    { "src": "index.html", "use": "@vercel/static" }
-  ],
   "routes": [
     { "src": "/api/check-hyperlane", "dest": "api/check-hyperlane.ts" },
     { "src": "/", "dest": "/index.html" }
