@@ -2,7 +2,7 @@ export const config = {
   runtime: 'edge',
 };
 
-export default async function handler(req) {
+export default async function handler(req: Request): Promise<Response> {
   const { searchParams } = new URL(req.url);
   const addresses = searchParams.get('addresses');
 
@@ -14,7 +14,7 @@ export default async function handler(req) {
   }
 
   const list = addresses.split(',').map(a => a.trim()).filter(Boolean);
-  const results = {};
+  const results: Record<string, any> = {};
 
   for (const addr of list) {
     try {
@@ -22,12 +22,12 @@ export default async function handler(req) {
       const res = await fetch(apiUrl, {
         headers: {
           'User-Agent': 'Mozilla/5.0',
-          'Accept': 'application/json',
+          'Accept': 'application/json'
         }
       });
       const data = await res.json();
       results[addr] = data;
-    } catch (e) {
+    } catch (e: any) {
       results[addr] = { error: true, message: e.message };
     }
   }
